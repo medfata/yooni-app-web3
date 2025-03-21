@@ -78,7 +78,7 @@ export default function Leaderboard() {
             Game <span className="highlight">Leaderboard</span>
           </h1>
           <p className="text-lg md:text-xl mb-6 text-gray-300">
-            See who's leading the competition
+            See who&apos;s leading the competition
           </p>
           
           {loading ? (
