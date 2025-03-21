@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import { list } from '@vercel/blob';
-import { parse } from 'csv/sync';
+import { createClient } from 'redis';
 
 // Define the type for our record
 interface XpRecord {
@@ -9,55 +8,44 @@ interface XpRecord {
   total_games: number;
 }
 
-// Define the context type for CSV parsing
-interface CastingContext {
-  column: string | number;
-  header: boolean;
-  index: number;
-  records: number;
+// Redis key for XP records - must match the one in xp/route.ts
+const REDIS_KEY = 'xp_records';
+
+// Helper function to connect to Redis
+async function getRedisClient() {
+  const client = createClient({
+    url: process.env.REDIS_URL || 'redis://localhost:6379'
+  });
+  
+  await client.connect();
+  return client;
 }
 
-// Blob pathname - must match the one in xp/route.ts
-const BLOB_PATH = 'data/xp_records.csv';
-
-// Read records from Blob storage
+// Read records from Redis
 async function readRecords(): Promise<XpRecord[]> {
   try {
-    // List all blobs with our path prefix
-    const response = await list({ prefix: BLOB_PATH });
+    const client = await getRedisClient();
     
-    // Check if our file exists in the list
-    const xpRecordBlob = response.blobs.find(blob => blob.pathname === BLOB_PATH);
+    // Get the records from Redis
+    const data = await client.get(REDIS_KEY);
+    await client.disconnect();
     
-    // If file doesn't exist
-    if (!xpRecordBlob) {
+    // If no data found, return empty array
+    if (!data) {
       return [];
     }
     
-    // Fetch the blob content
-    const blobResponse = await fetch(xpRecordBlob.url);
-    const content = await blobResponse.text();
-    
-    return parse(content, {
-      columns: true,
-      skip_empty_lines: true,
-      cast: (value: string, context: CastingContext) => {
-        // Convert numeric columns to numbers
-        if (context.column === 'score' || context.column === 'total_games') {
-          return parseInt(value, 10);
-        }
-        return value;
-      }
-    }) as XpRecord[];
+    // Parse the JSON data
+    return JSON.parse(data) as XpRecord[];
   } catch (error) {
-    console.error('Error reading records:', error);
+    console.error('Error reading records from Redis:', error);
     return [];
   }
 }
 
 export async function GET() {
   try {
-    // Read records from Blob storage
+    // Read records from Redis
     const records = await readRecords();
     
     // Calculate level for each record (score / 50)
@@ -73,7 +61,7 @@ export async function GET() {
     return NextResponse.json({
       success: true,
       data: sortedRecords.slice(0, 100),
-      message: "Leaderboard data retrieved from Vercel Blob storage"
+      message: "Leaderboard data retrieved from Redis"
     });
   } catch (error) {
     console.error('Error fetching leaderboard data:', error);

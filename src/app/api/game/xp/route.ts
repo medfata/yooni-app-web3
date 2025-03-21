@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { put, list } from '@vercel/blob';
-import { parse, stringify } from 'csv/sync';
+import { createClient } from 'redis';
 
 // Define the type for our record
 interface XpRecord {
@@ -9,64 +8,51 @@ interface XpRecord {
   total_games: number;
 }
 
-// Define the context type for CSV parsing based on the library's expectations
-interface CastingContext {
-  column: string | number;
-  header: boolean;
-  index: number;
-  records: number;
+// Redis key for XP records
+const REDIS_KEY = 'xp_records';
+
+// Helper function to connect to Redis
+async function getRedisClient() {
+  const client = createClient({
+    url: process.env.REDIS_URL || 'redis://localhost:6379'
+  });
+  
+  await client.connect();
+  return client;
 }
 
-// Blob pathname
-const BLOB_PATH = 'data/xp_records.csv';
-
-// Read records from Blob storage
+// Read records from Redis
 async function readRecords(): Promise<XpRecord[]> {
   try {
-    // List all blobs with our path prefix
-    const response = await list({ prefix: BLOB_PATH });
+    const client = await getRedisClient();
     
-    // Check if our file exists in the list
-    const xpRecordBlob = response.blobs.find(blob => blob.pathname === BLOB_PATH);
+    // Get the records from Redis
+    const data = await client.get(REDIS_KEY);
+    await client.disconnect();
     
-    // If file doesn't exist, create it with headers
-    if (!xpRecordBlob) {
-      await put(BLOB_PATH, 'account,score,total_games\n', { access: 'public' });
+    // If no data found, return empty array
+    if (!data) {
       return [];
     }
     
-    // Fetch the blob content
-    const blobResponse = await fetch(xpRecordBlob.url);
-    const content = await blobResponse.text();
-    
-    return parse(content, {
-      columns: true,
-      skip_empty_lines: true,
-      cast: (value: string, context: CastingContext) => {
-        // Convert numeric columns to numbers
-        if (context.column === 'score' || context.column === 'total_games') {
-          return parseInt(value, 10);
-        }
-        return value;
-      }
-    }) as XpRecord[];
+    // Parse the JSON data
+    return JSON.parse(data) as XpRecord[];
   } catch (error) {
-    console.error('Error reading records:', error);
+    console.error('Error reading records from Redis:', error);
     return [];
   }
 }
 
-// Write records to Blob storage
+// Write records to Redis
 async function writeRecords(records: XpRecord[]) {
   try {
-    const csv = stringify(records, {
-      header: true,
-      columns: ['account', 'score', 'total_games']
-    });
+    const client = await getRedisClient();
     
-    await put(BLOB_PATH, csv, { access: 'public' });
+    // Store records as JSON string
+    await client.set(REDIS_KEY, JSON.stringify(records));
+    await client.disconnect();
   } catch (error) {
-    console.error('Error writing records:', error);
+    console.error('Error writing records to Redis:', error);
     throw error;
   }
 }
@@ -105,12 +91,12 @@ export async function POST(request: NextRequest) {
       });
     }
     
-    // Write updated records back to Blob storage
+    // Write updated records back to Redis
     await writeRecords(records);
     
     return NextResponse.json({ 
       success: true,
-      message: "Score updated successfully in Vercel Blob storage"
+      message: "Score updated successfully in Redis"
     });
   } catch (error) {
     console.error('Error processing XP update:', error);
