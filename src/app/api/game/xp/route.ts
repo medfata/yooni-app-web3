@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { put, head } from '@vercel/blob';
+import { put, list } from '@vercel/blob';
 import { parse, stringify } from 'csv/sync';
 
 // Define the type for our record
@@ -23,19 +23,21 @@ const BLOB_PATH = 'data/xp_records.csv';
 // Read records from Blob storage
 async function readRecords(): Promise<XpRecord[]> {
   try {
-    // Check if the blob exists using the head API
-    const exists = await head(BLOB_PATH);
+    // List all blobs with our path prefix
+    const response = await list({ prefix: BLOB_PATH });
+    
+    // Check if our file exists in the list
+    const xpRecordBlob = response.blobs.find(blob => blob.pathname === BLOB_PATH);
     
     // If file doesn't exist, create it with headers
-    if (!exists) {
+    if (!xpRecordBlob) {
       await put(BLOB_PATH, 'account,score,total_games\n', { access: 'public' });
       return [];
     }
     
     // Fetch the blob content
-    const { url } = exists;
-    const response = await fetch(url);
-    const content = await response.text();
+    const blobResponse = await fetch(xpRecordBlob.url);
+    const content = await blobResponse.text();
     
     return parse(content, {
       columns: true,
