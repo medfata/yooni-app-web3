@@ -37,7 +37,7 @@ export default function About() {
           </h1>
           
           <p className="text-lg mb-8">
-            Yooni VEE is an exciting mini-game on the Soneuim chain, where our community can play, earn XP, and have the opportunity to convert XP into Yooni tokens. To reward our early supporters, we're launching a free mint NFT collection, giving holders a special chance to receive an airdrop allocation of Yooni tokens.
+            Yooni VEE is an exciting mini-game on the Soneuim chain, where our community can play, earn XP, and have the opportunity to convert XP into Yooni tokens. To reward our early supporters, we&apos;re launching a free mint NFT collection, giving holders a special chance to receive an airdrop allocation of Yooni tokens.
           </p>
 
           <div className="p-6 mb-8">
@@ -63,7 +63,7 @@ export default function About() {
             
             <h3 className="text-xl font-semibold mb-2">When will the free mint for the NFT collection take place?</h3>
             <p className="mb-4 text-gray-300">
-              The free mint for Yooni's NFT collection will be announced soon. Early supporters will get a chance to mint these NFTs at no cost.
+              The free mint for Yooni&apos;s NFT collection will be announced soon. Early supporters will get a chance to mint these NFTs at no cost.
             </p>
             
             <h3 className="text-xl font-semibold mb-2">How will the airdrop allocation be distributed to NFT holders?</h3>
