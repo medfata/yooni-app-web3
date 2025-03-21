@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { head } from '@vercel/blob';
 import { parse } from 'csv/sync';
 
 // Define the type for our record
@@ -16,22 +17,25 @@ interface CastingContext {
   records: number;
 }
 
-// The blob URL - must match the one in xp/route.ts
-const BLOB_URL = '3ue4pf82fw2lybxo.public.blob.vercel-storage.com/xp_records-PeORT6NTuZ938SrC9o0ttCXAIFRfed.csv';
+// Blob pathname - must match the one in xp/route.ts
+const BLOB_PATH = 'data/xp_records.csv';
 
 // Read records from Blob storage
 async function readRecords(): Promise<XpRecord[]> {
   try {
-    // Fetch the blob directly
-    const response = await fetch(BLOB_URL);
+    // Check if the blob exists
+    const exists = await head(BLOB_PATH);
     
-    // If file doesn't exist or response is not ok
-    if (!response.ok) {
+    // If file doesn't exist
+    if (!exists) {
       return [];
     }
     
-    // Read and parse CSV content
+    // Fetch the blob content
+    const { url } = exists;
+    const response = await fetch(url);
     const content = await response.text();
+    
     return parse(content, {
       columns: true,
       skip_empty_lines: true,

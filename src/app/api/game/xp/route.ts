@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { put } from '@vercel/blob';
+import { put, head } from '@vercel/blob';
 import { parse, stringify } from 'csv/sync';
 
 // Define the type for our record
@@ -17,23 +17,26 @@ interface CastingContext {
   records: number;
 }
 
-// The blob URL 
-const BLOB_URL = '3ue4pf82fw2lybxo.public.blob.vercel-storage.com/xp_records-PeORT6NTuZ938SrC9o0ttCXAIFRfed.csv';
+// Blob pathname
+const BLOB_PATH = 'data/xp_records.csv';
 
 // Read records from Blob storage
 async function readRecords(): Promise<XpRecord[]> {
   try {
-    // Fetch the blob directly
-    const response = await fetch(BLOB_URL);
+    // Check if the blob exists using the head API
+    const exists = await head(BLOB_PATH);
     
-    // If file doesn't exist or response is not ok, create it with headers
-    if (!response.ok) {
-      await put('xp_records-PeORT6NTuZ938SrC9o0ttCXAIFRfed.csv', 'account,score,total_games\n', { access: 'public' });
+    // If file doesn't exist, create it with headers
+    if (!exists) {
+      await put(BLOB_PATH, 'account,score,total_games\n', { access: 'public' });
       return [];
     }
     
-    // Read and parse CSV content
+    // Fetch the blob content
+    const { url } = exists;
+    const response = await fetch(url);
     const content = await response.text();
+    
     return parse(content, {
       columns: true,
       skip_empty_lines: true,
@@ -59,7 +62,7 @@ async function writeRecords(records: XpRecord[]) {
       columns: ['account', 'score', 'total_games']
     });
     
-    await put('xp_records-PeORT6NTuZ938SrC9o0ttCXAIFRfed.csv', csv, { access: 'public' });
+    await put(BLOB_PATH, csv, { access: 'public' });
   } catch (error) {
     console.error('Error writing records:', error);
     throw error;
