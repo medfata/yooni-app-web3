@@ -87,19 +87,19 @@ export default function Leaderboard() {
             </div>
           ) : (
             <div className="max-w-4xl mx-auto bg-black bg-opacity-40 backdrop-blur-md rounded-xl overflow-hidden border border-white border-opacity-10">
-              <table className="min-w-full divide-y divide-gray-700">
+              <table className="min-w-full md:w-[40rem] divide-y divide-gray-700">
                 <thead className="bg-gray-800 bg-opacity-50">
                   <tr>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-300 uppercase tracking-wider">
                       Rank
                     </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-300 uppercase tracking-wider">
                       Player
                     </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-300 uppercase tracking-wider">
                       XP
                     </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-300 uppercase tracking-wider">
                       Games
                     </th>
                   </tr>
