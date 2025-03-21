@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
+import { put } from '@vercel/blob';
 import { parse, stringify } from 'csv/sync';
 
-// Define the type for our CSV record
+// Define the type for our record
 interface XpRecord {
   account: string;
   score: number;
@@ -18,53 +17,54 @@ interface CastingContext {
   records: number;
 }
 
-// Path to the CSV file in the public directory
-const csvFilePath = path.join(process.cwd(), 'public', 'data', 'xp_records.csv');
+// The blob URL 
+const BLOB_URL = '3ue4pf82fw2lybxo.public.blob.vercel-storage.com/xp_records-PeORT6NTuZ938SrC9o0ttCXAIFRfed.csv';
 
-// Ensure the data directory exists
-const ensureDirectoryExists = () => {
-  const dir = path.dirname(csvFilePath);
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-  }
-};
-
-// Read records from CSV or initialize if it doesn't exist
-const readRecords = (): XpRecord[] => {
-  ensureDirectoryExists();
-  
-  if (!fs.existsSync(csvFilePath)) {
-    // If file doesn't exist, create it with headers
-    fs.writeFileSync(csvFilePath, 'account,score,total_games\n');
+// Read records from Blob storage
+async function readRecords(): Promise<XpRecord[]> {
+  try {
+    // Fetch the blob directly
+    const response = await fetch(BLOB_URL);
+    
+    // If file doesn't exist or response is not ok, create it with headers
+    if (!response.ok) {
+      await put('xp_records-PeORT6NTuZ938SrC9o0ttCXAIFRfed.csv', 'account,score,total_games\n', { access: 'public' });
+      return [];
+    }
+    
+    // Read and parse CSV content
+    const content = await response.text();
+    return parse(content, {
+      columns: true,
+      skip_empty_lines: true,
+      cast: (value: string, context: CastingContext) => {
+        // Convert numeric columns to numbers
+        if (context.column === 'score' || context.column === 'total_games') {
+          return parseInt(value, 10);
+        }
+        return value;
+      }
+    }) as XpRecord[];
+  } catch (error) {
+    console.error('Error reading records:', error);
     return [];
   }
-  
-  // Read and parse CSV content
-  const content = fs.readFileSync(csvFilePath, 'utf8');
-  return parse(content, {
-    columns: true,
-    skip_empty_lines: true,
-    cast: (value: string, context: CastingContext) => {
-      // Convert numeric columns to numbers
-      if (context.column === 'score' || context.column === 'total_games') {
-        return parseInt(value, 10);
-      }
-      return value;
-    }
-  }) as XpRecord[];
-};
+}
 
-// Write records to CSV
-const writeRecords = (records: XpRecord[]) => {
-  ensureDirectoryExists();
-  
-  const csv = stringify(records, {
-    header: true,
-    columns: ['account', 'score', 'total_games']
-  });
-  
-  fs.writeFileSync(csvFilePath, csv);
-};
+// Write records to Blob storage
+async function writeRecords(records: XpRecord[]) {
+  try {
+    const csv = stringify(records, {
+      header: true,
+      columns: ['account', 'score', 'total_games']
+    });
+    
+    await put('xp_records-PeORT6NTuZ938SrC9o0ttCXAIFRfed.csv', csv, { access: 'public' });
+  } catch (error) {
+    console.error('Error writing records:', error);
+    throw error;
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
     }
     
     // Read existing records
-    const records = readRecords();
+    const records = await readRecords();
     
     // Find if account already exists
     const existingRecordIndex = records.findIndex(record => record.account === account);
@@ -100,10 +100,13 @@ export async function POST(request: NextRequest) {
       });
     }
     
-    // Write updated records back to CSV
-    writeRecords(records);
+    // Write updated records back to Blob storage
+    await writeRecords(records);
     
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ 
+      success: true,
+      message: "Score updated successfully in Vercel Blob storage"
+    });
   } catch (error) {
     console.error('Error processing XP update:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

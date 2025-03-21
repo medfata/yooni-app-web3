@@ -1,46 +1,61 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
 import { parse } from 'csv/sync';
 
-// Define the type for our CSV record
+// Define the type for our record
 interface XpRecord {
   account: string;
   score: number;
   total_games: number;
 }
 
-// Path to the CSV file
-const csvFilePath = path.join(process.cwd(), 'public', 'data', 'xp_records.csv');
+// Define the context type for CSV parsing
+interface CastingContext {
+  column: string | number;
+  header: boolean;
+  index: number;
+  records: number;
+}
 
-// Read records from CSV or return empty array if it doesn't exist
-const readRecords = (): XpRecord[] => {
-  if (!fs.existsSync(csvFilePath)) {
+// The blob URL - must match the one in xp/route.ts
+const BLOB_URL = '3ue4pf82fw2lybxo.public.blob.vercel-storage.com/xp_records-PeORT6NTuZ938SrC9o0ttCXAIFRfed.csv';
+
+// Read records from Blob storage
+async function readRecords(): Promise<XpRecord[]> {
+  try {
+    // Fetch the blob directly
+    const response = await fetch(BLOB_URL);
+    
+    // If file doesn't exist or response is not ok
+    if (!response.ok) {
+      return [];
+    }
+    
+    // Read and parse CSV content
+    const content = await response.text();
+    return parse(content, {
+      columns: true,
+      skip_empty_lines: true,
+      cast: (value: string, context: CastingContext) => {
+        // Convert numeric columns to numbers
+        if (context.column === 'score' || context.column === 'total_games') {
+          return parseInt(value, 10);
+        }
+        return value;
+      }
+    }) as XpRecord[];
+  } catch (error) {
+    console.error('Error reading records:', error);
     return [];
   }
-  
-  // Read and parse CSV content
-  const content = fs.readFileSync(csvFilePath, 'utf8');
-  return parse(content, {
-    columns: true,
-    skip_empty_lines: true,
-    cast: (value: string, context: { column: string | number }) => {
-      // Convert numeric columns to numbers
-      if (context.column === 'score' || context.column === 'total_games') {
-        return parseInt(value, 10);
-      }
-      return value;
-    }
-  }) as XpRecord[];
-};
+}
 
 export async function GET() {
   try {
-    // Read records from CSV
-    const records = readRecords();
+    // Read records from Blob storage
+    const records = await readRecords();
     
     // Calculate level for each record (score / 50)
-    const recordsWithLevel = records.map(record => ({
+    const recordsWithLevel = records.map((record: XpRecord) => ({
       ...record,
       level: Math.floor(record.score / 50)
     }));
@@ -51,7 +66,8 @@ export async function GET() {
     // Return top 100 records
     return NextResponse.json({
       success: true,
-      data: sortedRecords.slice(0, 100)
+      data: sortedRecords.slice(0, 100),
+      message: "Leaderboard data retrieved from Vercel Blob storage"
     });
   } catch (error) {
     console.error('Error fetching leaderboard data:', error);
