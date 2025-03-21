@@ -60,8 +60,7 @@ export async function GET() {
     // Return top 100 records
     return NextResponse.json({
       success: true,
-      data: sortedRecords.slice(0, 100),
-      message: "Leaderboard data retrieved from Redis"
+      data: sortedRecords.slice(0, 100)
     });
   } catch (error) {
     console.error('Error fetching leaderboard data:', error);

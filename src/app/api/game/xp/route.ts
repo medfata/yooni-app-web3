@@ -95,8 +95,7 @@ export async function POST(request: NextRequest) {
     await writeRecords(records);
     
     return NextResponse.json({ 
-      success: true,
-      message: "Score updated successfully in Redis"
+      success: true
     });
   } catch (error) {
     console.error('Error processing XP update:', error);

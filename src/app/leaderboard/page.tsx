@@ -97,10 +97,7 @@ export default function Leaderboard() {
                       Player
                     </th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                      Level
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                      Score
+                      XP
                     </th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                       Games
@@ -129,19 +126,8 @@ export default function Leaderboard() {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-white">{formatAccount(entry.account)}</div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-white flex items-center">
-                          <span className="mr-2">Lvl {entry.level}</span>
-                          <div className="h-2 w-16 bg-gray-700 rounded-full overflow-hidden">
-                            <div 
-                              className="h-full bg-gradient-to-r from-purple-500 to-pink-500" 
-                              style={{ width: `${(entry.score % 50) * 2}%` }}
-                            ></div>
-                          </div>
-                        </div>
-                      </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
-                        {entry.score.toLocaleString()}
+                        { Math.floor(entry.score / 50) }
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
                         {entry.total_games}
