@@ -21,7 +21,8 @@ export default function Header({ onMobileMenuOpen }: HeaderProps) {
       <nav className="nav-links flex gap-8">
         <Link href="/" className={pathname === "/" ? "active" : ""}>Home</Link>
         <Link href="/marketplace" className={pathname === "/marketplace" ? "active" : ""}>Market Place</Link>
-        <Link href="#" className={pathname === "/about" ? "active" : ""}>About</Link>
+        <Link href="/leaderboard" className={pathname === "/leaderboard" ? "active" : ""}>LeaderBoard</Link>
+        <Link href="/about" className={pathname === "/about" ? "active" : ""}>About</Link>
       </nav>
       <ConnectButton.Custom>
         {({

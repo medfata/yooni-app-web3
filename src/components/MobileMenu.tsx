@@ -26,7 +26,8 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
       </button>
       <Link href="/" className={pathname === "/" ? "active" : ""} onClick={onClose}>Home</Link>
       <Link href="/marketplace" className={pathname === "/marketplace" ? "active" : ""} onClick={onClose}>Market Place</Link>
-      <Link href="#" className={pathname === "/about" ? "active" : ""} onClick={onClose}>About</Link>
+      <Link href="/leaderboard" className={pathname === "/leaderboard" ? "active" : ""} onClick={onClose}>LeaderBoard</Link>
+      <Link href="/about" className={pathname === "/about" ? "active" : ""} onClick={onClose}>About</Link>
       
       <ConnectButton.Custom>
         {({
