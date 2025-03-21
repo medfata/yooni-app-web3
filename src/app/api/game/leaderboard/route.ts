@@ -11,7 +11,7 @@ interface XpRecord {
 }
 
 // Path to the CSV file
-const csvFilePath = path.join(process.cwd(), 'data', 'xp_records.csv');
+const csvFilePath = path.join(process.cwd(), 'public', 'data', 'xp_records.csv');
 
 // Read records from CSV or return empty array if it doesn't exist
 const readRecords = (): XpRecord[] => {

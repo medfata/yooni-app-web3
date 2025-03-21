@@ -18,8 +18,8 @@ interface CastingContext {
   records: number;
 }
 
-// Path to the CSV file
-const csvFilePath = path.join(process.cwd(), 'data', 'xp_records.csv');
+// Path to the CSV file in the public directory
+const csvFilePath = path.join(process.cwd(), 'public', 'data', 'xp_records.csv');
 
 // Ensure the data directory exists
 const ensureDirectoryExists = () => {
