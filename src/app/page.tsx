@@ -82,15 +82,7 @@ export default function Home() {
                 >
                   {(() => {
                     if (!connected) {
-                      return (
-                        <button
-                          onClick={openConnectModal}
-                          type="button"
-                          className="play-button"
-                        >
-                          Connect Wallet
-                        </button>
-                      );
+                      return;
                     }
 
                     if (chain.unsupported) {
