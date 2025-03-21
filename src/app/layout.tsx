@@ -4,7 +4,6 @@ import "./globals.css";
 import "@rainbow-me/rainbowkit/styles.css";
 
 import { WalletProvider } from "@/modules/wagmi/components/WalletProvider";
-import { Header } from "@/modules/common/components/Header";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,9 +16,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "WAGMI + RainbowKit Demo App",
+  title: "Yooni - Home",
   description:
-    "A Demo app for minting NFTs on Soneium Minato by using WAGMI and Rainbowkit.",
+    "Yooni",
 };
 
 export default function RootLayout({
@@ -30,7 +29,6 @@ export default function RootLayout({
   return (
     <html lang="en">
       <WalletProvider>
-      <Header />
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
