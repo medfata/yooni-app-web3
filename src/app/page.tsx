@@ -56,7 +56,6 @@ export default function Home() {
             {({
               account,
               chain,
-              openAccountModal,
               openChainModal,
               openConnectModal,
               authenticationStatus,

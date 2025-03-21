@@ -10,7 +10,7 @@ interface MobileMenuProps {
   onPlayClick?: () => void;
 }
 
-export default function MobileMenu({ isOpen, onClose, onPlayClick }: MobileMenuProps) {
+export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
   const pathname = usePathname();
 
   return (
