@@ -57,7 +57,6 @@ export default function Home() {
               account,
               chain,
               openChainModal,
-              openConnectModal,
               authenticationStatus,
               mounted,
             }) => {
