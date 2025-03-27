@@ -16,7 +16,7 @@ export default function Header({ onMobileMenuOpen }: HeaderProps) {
   return (
     <header className="header flex justify-between items-center p-4 md:p-8 bg-black bg-opacity-30 backdrop-blur-md fixed top-0 left-0 right-0 z-10 rounded-full m-4 md:m-40 w-full md:w-auto border border-white border-opacity-5">
       <div className="logo-container">
-        <Image src="/logo.png" alt="Game Logo" className="logo-header w-auto h-7" width={120} height={28} />
+        <Image src="/logo.png" alt="Game Logo" width={60} height={50}  />
       </div>
       <nav className="nav-links flex gap-8">
         <Link href="/" className={pathname === "/" ? "active" : ""}>Home</Link>
